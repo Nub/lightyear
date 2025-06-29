@@ -260,7 +260,7 @@ fn confirmed_added_sync(
                 .is_ok_and(|mode| mode != PredictionMode::None);
             let kind = component_registry.component_id_to_kind.get(id).unwrap();
             let name = component_registry.serialize_fns_map.get(kind).unwrap().type_name;
-            info!(
+            trace::info!(
                 "Checking if we should sync component {name:?} from confirmed {confirmed:?} to predicted {predicted:?}: should_sync = {ok}",
             );
             ok
