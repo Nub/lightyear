@@ -170,7 +170,8 @@ fn apply_predicted_sync(world: &mut World) {
             .buffer;
             trace!(
                 "Sync from confirmed {:?} to predicted {:?}",
-                event.confirmed, event.predicted
+                event.confirmed,
+                event.predicted
             );
 
             let world = unsafe { unsafe_world.world_mut() };
@@ -241,13 +242,28 @@ fn confirmed_added_sync(
     let Some(predicted) = confirmed_component.predicted else {
         return;
     };
+    // let components: Vec<ComponentId> = entity_ref
+    //     .archetype()
+    //     .components()
+    //     .filter(|id| {
+    //         prediction_registry
+    //             .get_prediction_mode(*id, &component_registry)
+    //             .is_ok_and(|mode| mode != PredictionMode::None)
+    //     })
+    //     .collect();
     let components: Vec<ComponentId> = entity_ref
         .archetype()
         .components()
         .filter(|id| {
-            prediction_registry
+            let ok = prediction_registry
                 .get_prediction_mode(*id, &component_registry)
-                .is_ok_and(|mode| mode != PredictionMode::None)
+                .is_ok_and(|mode| mode != PredictionMode::None);
+            let kind = component_registry.component_id_to_kind.get(id).unwrap();
+            let name = component_registry.serialize_fns_map.get(kind).unwrap().type_name;
+            info!(
+                "Checking if we should sync component {name:?} from confirmed {confirmed:?} to predicted {predicted:?}: should_sync = {ok}",
+            );
+            ok
         })
         .collect();
     if components.is_empty() {
